@@ -1,66 +1,105 @@
 //電子レンジ
+//500,600,700Wを選択可能
+//タイマーは最大10分まで設定可能
 
-import UIKit
+//2022/10/26 フィードバック
+
+//500W、600W、700Wのワット数を選択できる
+//定義はenumでOK :ok
+//メソッド実行時にワット数を選択できるようにする :ok
+//選択されたことがわかるようにPrint出力できるようにする :ok
+
+//タイマー機能
+//initでクラス初期化する時に timerをセットできるようにする
+//セットされたタイマーが10分より上ならタイマーをスタートさせない
+//Printでエラー内容を表示
+//その他
+//今もやられてると思いますが動画教材や今実装しているコードに対して「1行1行に対して日本語でコメントを書く」を今一度意識してやってみましょう:+1:
+//これを行うことで「コードの意味を日本語で理解」することができるようになります
+//コードを日本語で理解できると、「日本語→コード」の変換もできるようになり、応用学習の課題制作もできるようになります
+
 import Foundation // Timerクラスを使用するために必要なモジュール
 import PlaygroundSupport // Playground上でTimerクラスを機能させるために必要なモジュール
 
 // デフォルトだとTimerクラスを継続的に処理させることが出来ないため、フラグを変更
 PlaygroundPage.current.needsIndefiniteExecution = true
 
-class Microwave{
-    
-    //500W、600W、700Wのワット数を選択できる
-    enum wattage {
-        case 500W
-        case 600W
-        case 700W
-        
-    //タイマーが「0」になったら「ピピピ」っとアラームを出力
-    
-        class Alarm {
-            var timer: Timer?
-            var count: Int = 0
-            var limit: Int = 5
-            
-            func start() {
-                // 任意の箇所でTimerクラスを使用して1秒毎にcountup()メソッドを実行させるタイマーをセット
-                timer = Timer.scheduledTimer(
-                    timeInterval: 1, // タイマーの実行間隔を指定(単位はn秒)
-                    target: self, // ここは「self」でOK
-                    selector: #selector(countup), // timeInterval毎に実行するメソッドを指定
-                    userInfo: nil, // ここは「nil」でOK
-                    repeats: true // 繰り返し処理を実行したいので「true」を指定
-                )
-            }
-            
-            //タイマーを最大「10分」までセットできる
-            
-            InputValue (_ value, 1 min, int 10)
-            {
-                if (value < min) {
-                    return min;
-                }
-                else if (value > max) {
-                    return max;
-                }
-                return value;
-            }
 
-            // Timerクラスに設定するメソッドは「@objc」キワードを忘れずに付与する
-            @objc func countup() {
-                // countの値をインクリメントする
-                count += 1
-                print("カウントは\(count)です")
-                // countの値がlimitの値以上になったif文を実行
-                if limit <= count {
-                    print("ピピピ！(カウントをストップします)")
-                    // タイマーを止める
-                    timer?.invalidate()
-                }
-            }
+
+//ワット数を選択できる enumとswhichのコンビを活用
+enum Wattage{
+    case wat500w
+    case wat600w
+    case wat700w
+    
+    //「ワット数をprintで表示する」ためにコンピューティッドプロパティを定義する
+    var wattagePower: String {
+        switch self {
+        case .wat500w:
+            return "500w"
+        case .wat600w:
+            return "600w"
+        case .wat700w:
+            return "700w"
         }
-
-        let alarm = Alarm()
-        alarm.start()
+    }
 }
+
+
+class Alarm {
+    var timer: Timer?
+    var time = (min:0,sec:0)
+    var limit: Int = 0
+    
+    init(min:Int, sec:Int){
+        self.time.min = 0
+        self.time.sec = 0
+    }
+    
+    func start(w: Wattage) {
+        //任意の箇所でTimerクラスを使用して1秒毎にcountup()メソッドを実行させるタイマーをセット
+        timer = Timer.scheduledTimer(
+            timeInterval: 1, // タイマーの実行間隔を指定(単位はn秒)
+            target: self, // ここは「self」でOK
+            selector: #selector(countdown), // timeInterval毎に実行するメソッドを指定
+            userInfo: nil, // ここは「nil」でOK
+            repeats: true // 繰り返し処理を実行したいので「true」を指定
+            )
+            //minが10分より短ければ温める
+            //minが11分以上ならカウント停止
+            //選択したW数が表示される
+        if time.min > 10 {
+                timer?.invalidate()
+                print("10分以内で設定してください")
+        }else if time.min <= 10 {
+                print("\(w.wattagePower)で温める")
+            }
+        
+    }
+    
+    // Timerクラスに設定するメソッドは「@objc」キワードを忘れずに付与する
+    @objc func countdown() {
+        // countの値をインクリメントする
+        time.sec -= 1
+        print("残り\(time.sec)秒です")
+        
+        //secが0になった判定
+        if time.sec == 0 && time.min > 0 {
+            time.sec = 59
+            time.min -= 1
+            print("残り\(time.min)分です")
+        }
+        
+        
+        // countの値がlimitの値以上になったif文を実行
+        if limit == time.min && limit == time.sec {
+            print("ピピピ")
+            // タイマーを止める
+            timer?.invalidate()
+        }
+    }
+}
+
+let alarm = Alarm(min: 2, sec: 10)
+alarm.start(w: .wat700w)
 
