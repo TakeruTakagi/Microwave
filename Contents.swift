@@ -60,9 +60,12 @@ class Alarm {
         //minが10分より短ければ温める
         //minが11分以上ならカウント停止
         //選択したW数が表示される
+        //タイマーが0分0秒の時もタイマーがスタートしてしまうので、0分0秒時はタイマーをスタートできないようにする
         if time.min >= 10 && time.sec >= 1 {
             timer?.invalidate()
             print("10分以内で設定してください")
+        }else if time.min == 0, time.sec == 0 {
+            timer?.invalidate()
         }else if time.min <= 10 {
             print("\(w.wattagePower)で温める")
         }
@@ -92,7 +95,10 @@ class Alarm {
         
         
         // countの値がlimitの値以上になったif文を実行
-        if limit == time.min && limit == time.sec {
+        if time.min == 0, time.sec == 0 {
+            timer?.invalidate()
+            print("タイマーを設定してください")
+        }else if limit == time.min && limit == time.sec {
             print("ピピピ")
             // タイマーを止める
             timer?.invalidate()
@@ -100,6 +106,6 @@ class Alarm {
     }
 }
 
-let alarm = Alarm(min: 1, sec: 0)
+let alarm = Alarm(min: 0, sec: 0)
 alarm.start(w: .wat700w)
 
