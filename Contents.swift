@@ -52,20 +52,11 @@ class Alarm {
     var limit: Int = 0
     
     init(min:Int, sec:Int){
-        self.time.min = min
-        self.time.sec = sec
+        self.time.min = 0
+        self.time.sec = 0
     }
     
     func start(w: Wattage) {
-        //minが10分より短ければ温める
-        //minが11分以上ならカウント停止
-        //選択したW数が表示される
-        if time.min >= 10 && time.sec >= 1 {
-            timer?.invalidate()
-            print("10分以内で設定してください")
-        }else if time.min <= 10 {
-            print("\(w.wattagePower)で温める")
-        }
         //任意の箇所でTimerクラスを使用して1秒毎にcountup()メソッドを実行させるタイマーをセット
         timer = Timer.scheduledTimer(
             timeInterval: 1, // タイマーの実行間隔を指定(単位はn秒)
@@ -73,21 +64,30 @@ class Alarm {
             selector: #selector(countdown), // timeInterval毎に実行するメソッドを指定
             userInfo: nil, // ここは「nil」でOK
             repeats: true // 繰り返し処理を実行したいので「true」を指定
-        )
+            )
+            //minが10分より短ければ温める
+            //minが11分以上ならカウント停止
+            //選択したW数が表示される
+        if time.min > 10 {
+                timer?.invalidate()
+                print("10分以内で設定してください")
+        }else if time.min <= 10 {
+                print("\(w.wattagePower)で温める")
+            }
+        
     }
     
     // Timerクラスに設定するメソッドは「@objc」キワードを忘れずに付与する
     @objc func countdown() {
-        // タイマーを1秒ずつ減らす
-        if time.min < 10 && time.sec > 0 {
-            time.sec -= 1
-            print("残り\(time.min)分\(time.sec)秒です")
-        }
+        // countの値をインクリメントする
+        time.sec -= 1
+        print("残り\(time.sec)秒です")
+        
         //secが0になった判定
-        if  time.min > 0 && time.sec == 0 {
+        if time.sec == 0 && time.min > 0 {
             time.sec = 59
             time.min -= 1
-            print("残り\(time.min)分\(time.sec)秒です")
+            print("残り\(time.min)分です")
         }
         
         
@@ -100,6 +100,6 @@ class Alarm {
     }
 }
 
-let alarm = Alarm(min: 1, sec: 0)
+let alarm = Alarm(min: 2, sec: 10)
 alarm.start(w: .wat700w)
 
