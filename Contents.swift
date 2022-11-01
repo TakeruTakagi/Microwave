@@ -61,14 +61,25 @@ class Alarm {
         //minが11分以上ならカウント停止
         //選択したW数が表示される
         //タイマーが0分0秒の時もタイマーがスタートしてしまうので、0分0秒時はタイマーをスタートできないようにする
-        if time.min >= 10 && time.sec >= 1 {
-            timer?.invalidate()
-            print("10分以内で設定してください")
-        }else if time.min == 0, time.sec == 0 {
-            timer?.invalidate()
-        }else if time.min <= 10 {
-            print("\(w.wattagePower)で温める")
+        if time.min <= 0 && time.sec <= 0 {
+            print("タイマーを正常な値に設定してください")
+            return
         }
+                
+        if time.min < 0 || time.sec < 0 {
+            print("譜の数は設定できません")
+            return
+        }
+        
+        //タイマーが10分以上であればreturn
+        if time.min >= 10, time.sec >= 1 {
+            print("10分以内で設定してください")
+            return
+        }
+        
+        print("\(time.min)分\(time.sec)秒でタイマーがセットされました")
+        print("\(w.wattagePower)で温めスタート")
+        
         //任意の箇所でTimerクラスを使用して1秒毎にcountup()メソッドを実行させるタイマーをセット
         timer = Timer.scheduledTimer(
             timeInterval: 1, // タイマーの実行間隔を指定(単位はn秒)
@@ -93,19 +104,15 @@ class Alarm {
             print("残り\(time.min)分\(time.sec)秒です")
         }
         
-        
         // countの値がlimitの値以上になったif文を実行
-        if time.min == 0, time.sec == 0 {
-            timer?.invalidate()
-            print("タイマーを設定してください")
-        }else if limit == time.min && limit == time.sec {
-            print("ピピピ")
+        if limit == time.min, limit == time.sec {
+        print("ピピピ")
             // タイマーを止める
             timer?.invalidate()
         }
     }
 }
 
-let alarm = Alarm(min: 0, sec: 0)
+let alarm = Alarm(min: 0, sec: 10)
 alarm.start(w: .wat700w)
 
